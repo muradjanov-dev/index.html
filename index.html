@@ -497,15 +497,27 @@
                     // ===================================================================
                     // IMPORTANT: PASTE YOUR FIREBASE CONFIG OBJECT HERE
                     // ===================================================================
-                    const firebaseConfig = {                     
-                        apiKey: "AIzaSyAtqq96GDDTw2gQ8XR484IJhxdmeEaxuLk",
-                        authDomain: "kitobchallenge.firebaseapp.com",
-                        projectId: "kitobchallenge",
-                        storageBucket: "kitobchallenge.firebasestorage.app",
-                        messagingSenderId: "541058048837",
-                        appId: "1:541058048837:web:359c76e3789e7b8ee8942c",
-                        measurementId: "G-CN7JWZKGXF"
+                    // Import the functions you need from the SDKs you need
+                    import { initializeApp } from "firebase/app";
+                    import { getAnalytics } from "firebase/analytics";
+                    // TODO: Add SDKs for Firebase products that you want to use
+                    // https://firebase.google.com/docs/web/setup#available-libraries
+                    
+                    // Your web app's Firebase configuration
+                    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+                    const firebaseConfig = {
+                      apiKey: "AIzaSyAtqq96GDDTw2gQ8XR484IJhxdmeEaxuLk",
+                      authDomain: "kitobchallenge.firebaseapp.com",
+                      projectId: "kitobchallenge",
+                      storageBucket: "kitobchallenge.firebasestorage.app",
+                      messagingSenderId: "541058048837",
+                      appId: "1:541058048837:web:359c76e3789e7b8ee8942c",
+                      measurementId: "G-CN7JWZKGXF"
                     };
+                    
+                    // Initialize Firebase
+                    const app = initializeApp(firebaseConfig);
+                    const analytics = getAnalytics(app);
                     // ===================================================================
 
                     // NEW: Add a check for the placeholder API key
@@ -568,11 +580,17 @@
                 const booksCollectionPath = `artifacts/${appId}/users/${userId}/books`;
                 const q = query(collection(db, booksCollectionPath));
                 const unsubscribeBooks = onSnapshot(q, (querySnapshot) => {
-                    const booksData = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    let booksData = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                    // FIX: Sort books by creation date client-side
+                    booksData.sort((a, b) => {
+                        const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : 0;
+                        const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : 0;
+                        return dateB - dateA;
+                    });
                     setBooks(booksData);
                 }, (err) => {
                     console.error("Error fetching books:", err);
-                    setError("Failed to fetch your books. Please check your Firestore indexes.");
+                    setError("Failed to fetch your books. Please check your Firestore indexes and rules.");
                 });
 
                 return () => unsubscribeBooks();
