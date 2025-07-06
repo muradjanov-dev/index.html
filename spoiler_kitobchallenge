@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitob Challenge</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-dark-green: #1A3A3A;
+            --brand-cream: #EFEBE0;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            color: var(--brand-cream);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* The animated background */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab, #1A3A3A);
+            background-size: 400% 400%;
+            animation: gradient-flow 15s ease infinite;
+            z-index: 1;
+        }
+
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+            animation: fade-in-down 1s ease-out;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+            animation: fade-in-down 1s ease-out 0.2s;
+            animation-fill-mode: backwards;
+        }
+        
+        .main-message {
+            font-size: 2rem;
+            font-weight: 700;
+            padding: 0 20px;
+            max-width: 600px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+            animation: fade-in-up 1s ease-out 0.5s;
+            animation-fill-mode: backwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 2rem;
+            }
+            .tagline {
+                font-size: 0.8rem;
+            }
+            .main-message {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Fade in animations */
+        @keyframes fade-in-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+
+    <div class="container">
+        <div class="logo">KITOB | CHALLENGE</div>
+        <div class="tagline">O‘QIYMIZ VA YUKSALAMIZ</div>
+        <h1 class="main-message">Tez kunda Kitob Challenge'da yangilik</h1>
+    </div>
+
+</body>
+</html>
