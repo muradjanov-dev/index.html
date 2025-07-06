@@ -12,6 +12,10 @@
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Google Fonts for the animated title -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
     <style>
         body {
             background-color: var(--tg-theme-bg-color, #182230);
@@ -24,6 +28,48 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
+        }
+        /* Gradient animation for the title in the main app */
+        .animated-title {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(90deg, #818cf8, #f472b6, #60a5fa, #818cf8);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: text-gradient-flow 4s linear infinite;
+        }
+        @keyframes text-gradient-flow {
+            to {
+                background-position: 200% center;
+            }
+        }
+        /* NEW: Styles for the initial loading screen animation */
+        .loading-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.25rem; /* 36px */
+            line-height: 2.5rem; /* 40px */
+            font-weight: 700;
+            color: var(--tg-theme-text-color, #ffffff);
+            overflow: hidden; /* Ensures the text is not seen before the animation */
+            border-right: .15em solid var(--tg-theme-button-color, #3390ec); /* The typewriter cursor */
+            white-space: nowrap; /* Keeps the content on a single line */
+            margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+            letter-spacing: .1em; /* Adjust as needed */
+            animation:
+                typing 2.5s steps(30, end),
+                blink-caret .75s step-end infinite;
+        }
+
+        /* The typing effect */
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        /* The typewriter cursor effect */
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--tg-theme-button-color, #3390ec); }
         }
     </style>
 </head>
@@ -51,9 +97,17 @@
             </div>
         );
 
+        const LoadingScreen = () => (
+            <div className="flex items-center justify-center h-screen">
+                <h1 className="loading-title">Kitob Challenge</h1>
+            </div>
+        );
+
         // --- Main Application Component ---
         const MainApp = ({ user, books, onLogReading, onAddNewBook, onDeleteBook }) => {
             const [dailyLogModalOpen, setDailyLogModalOpen] = useState(false);
+            const [insightsModalOpen, setInsightsModalOpen] = useState(false);
+            const [selectedBookForInsights, setSelectedBookForInsights] = useState(null);
             const [report, setReport] = useState(null);
 
             const handleLogConfirm = async (logData) => {
@@ -61,6 +115,11 @@
                 if (newReport) {
                     setReport(newReport);
                 }
+            };
+            
+            const openInsights = (book) => {
+                setSelectedBookForInsights(book);
+                setInsightsModalOpen(true);
             };
 
             return (
@@ -73,11 +132,17 @@
                             onAddNewBook={onAddNewBook}
                         />
                     )}
+                    {insightsModalOpen && (
+                        <BookInsightsModal
+                            book={selectedBookForInsights}
+                            onClose={() => setInsightsModalOpen(false)}
+                        />
+                    )}
                     <div className="p-4 sm:p-6 md:p-8">
                         <div className="max-w-4xl mx-auto">
                             <header className="mb-8 flex justify-between items-center">
                                 <div>
-                                    <h1 className="text-3xl sm:text-4xl font-bold" style={{color: 'var(--tg-theme-text-color, #ffffff)'}}>
+                                    <h1 className="text-3xl sm:text-4xl font-bold animated-title">
                                         Kitob Challenge
                                     </h1>
                                     <p style={{color: 'var(--tg-theme-hint-color, #999999)'}} className="mt-1">Welcome, {user.fullName.split(' ')[0]}!</p>
@@ -112,7 +177,7 @@
                                 <h2 className="text-2xl font-bold mb-4 flex items-center"><BookIcon /> My Library</h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {books.length > 0 ? books.map(book => (
-                                        <div key={book.id} className="p-4 rounded-xl flex flex-col justify-between" style={{backgroundColor: 'var(--tg-theme-secondary-bg-color, #2a3542)'}}>
+                                        <div key={book.id} className="p-4 rounded-xl flex flex-col justify-between cursor-pointer" style={{backgroundColor: 'var(--tg-theme-secondary-bg-color, #2a3542)'}} onClick={() => openInsights(book)}>
                                             <div>
                                                 <h3 className="font-bold text-lg">{book.title}</h3>
                                                 <p className="text-sm mb-2" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>{book.author}</p>
@@ -121,7 +186,7 @@
                                                 </div>
                                                 <p className="text-right text-xs mt-1" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>{book.pagesRead || 0} / {book.totalPages} pages</p>
                                             </div>
-                                            <button onClick={() => onDeleteBook(book.id)} className="self-end mt-2 p-1 rounded-full" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>
+                                            <button onClick={(e) => {e.stopPropagation(); onDeleteBook(book.id)}} className="self-end mt-2 p-1 rounded-full" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>
                                                 <TrashIcon />
                                             </button>
                                         </div>
@@ -322,6 +387,77 @@
             );
         };
 
+        // NEW: Book Insights Modal
+        const BookInsightsModal = ({ book, onClose }) => {
+            const [insight, setInsight] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            const [error, setError] = useState('');
+
+            const getInsight = async (type) => {
+                setIsLoading(true);
+                setInsight('');
+                setError('');
+                
+                let prompt = '';
+                if (type === 'characters') {
+                    prompt = `Provide a brief analysis of the main characters in the book "${book.title}".`;
+                } else if (type === 'themes') {
+                    prompt = `What are the main themes explored in the book "${book.title}"? Explain each one briefly.`;
+                }
+
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                
+                try {
+                    const apiKey = "";
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0) {
+                        setInsight(result.candidates[0].content.parts[0].text);
+                    } else {
+                        throw new Error("Could not generate insights for this book.");
+                    }
+                } catch (err) {
+                    console.error("Error getting insight:", err);
+                    setError("Sorry, I couldn't generate insights at this time.");
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            return (
+                <div className="fixed inset-0 flex justify-center items-center p-4 z-50" style={{backgroundColor: 'rgba(0,0,0,0.7)'}}>
+                    <div className="w-full max-w-2xl p-6 rounded-xl relative max-h-[90vh] flex flex-col" style={{backgroundColor: 'var(--tg-theme-secondary-bg-color, #2a3542)'}}>
+                        <h2 className="text-2xl font-bold mb-1">{book.title}</h2>
+                        <p className="mb-4" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>by {book.author}</p>
+                        
+                        <div className="flex gap-4 mb-4">
+                            <button onClick={() => getInsight('characters')} disabled={isLoading} className="flex-1 text-white font-bold p-2 rounded-md flex items-center justify-center transition-colors" style={{backgroundColor: 'var(--tg-theme-button-color, #3390ec)'}}>
+                                <SparklesIcon className="h-5 w-5 mr-2" /> ✨ Analyze Characters
+                            </button>
+                            <button onClick={() => getInsight('themes')} disabled={isLoading} className="flex-1 text-white font-bold p-2 rounded-md flex items-center justify-center transition-colors" style={{backgroundColor: 'var(--tg-theme-button-color, #3390ec)'}}>
+                                <SparklesIcon className="h-5 w-5 mr-2" /> ✨ Explain Themes
+                            </button>
+                        </div>
+
+                        <div className="flex-grow overflow-y-auto p-3 rounded-lg" style={{backgroundColor: 'var(--tg-theme-bg-color, #182230)'}}>
+                            {isLoading && <Spinner size="h-8 w-8" />}
+                            {error && <p style={{color: 'var(--tg-theme-destructive-text-color, #ff4d4d)'}}>{error}</p>}
+                            {insight && <div className="whitespace-pre-wrap">{insight}</div>}
+                            {!isLoading && !error && !insight && <p style={{color: 'var(--tg-theme-hint-color, #999999)'}}>Select an option above to get AI-powered insights about this book.</p>}
+                        </div>
+
+                        <button onClick={onClose} className="absolute top-4 right-4 text-2xl leading-none" style={{color: 'var(--tg-theme-hint-color, #999999)'}}>&times;</button>
+                    </div>
+                </div>
+            );
+        };
+
         // --- Root App Component ---
         const App = () => {
             const [db, setDb] = useState(null);
@@ -336,31 +472,49 @@
             // --- Initialization ---
             useEffect(() => {
                 try {
-                    // 1. Initialize Telegram
-                    const tg = window.Telegram.WebApp;
-                    tg.ready();
-                    tg.expand(); // Make the web app full screen
-                    
-                    if (!tg.initDataUnsafe || !tg.initDataUnsafe.user) {
-                        setError("Please open this app through your Telegram bot.");
-                        setIsLoading(false);
-                        return;
+                    // 1. Initialize Telegram & Create Mock User for Browser Testing
+                    let user;
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user && window.Telegram.WebApp.initDataUnsafe.user.id) {
+                        const tg = window.Telegram.WebApp;
+                        tg.ready();
+                        tg.expand();
+                        user = tg.initDataUnsafe.user;
+                    } else {
+                        // Create a mock user for local browser testing
+                        console.warn("Telegram context not found. Running in local test mode.");
+                        user = {
+                            id: 123456789,
+                            first_name: "Local",
+                            last_name: "Tester",
+                            username: "local_tester",
+                        };
                     }
-                    setTgUser(tg.initDataUnsafe.user);
+                    setTgUser(user);
                     
                     // 2. Initialize Firebase
                     setLogLevel('debug');
-                    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAtqq96GDDTw2gQ8XR484IJhxdmeEaxuLk",
-  authDomain: "kitobchallenge.firebaseapp.com",
-  projectId: "kitobchallenge",
-  storageBucket: "kitobchallenge.firebasestorage.app",
-  messagingSenderId: "541058048837",
-  appId: "1:541058048837:web:359c76e3789e7b8ee8942c",
-  measurementId: "G-CN7JWZKGXF"
-};
+                    
+                    // ===================================================================
+                    // IMPORTANT: PASTE YOUR FIREBASE CONFIG OBJECT HERE
+                    // ===================================================================
+                    const firebaseConfig = {                     
+                        apiKey: "AIzaSyAtqq96GDDTw2gQ8XR484IJhxdmeEaxuLk",
+                        authDomain: "kitobchallenge.firebaseapp.com",
+                        projectId: "kitobchallenge",
+                        storageBucket: "kitobchallenge.firebasestorage.app",
+                        messagingSenderId: "541058048837",
+                        appId: "1:541058048837:web:359c76e3789e7b8ee8942c",
+                        measurementId: "G-CN7JWZKGXF"
+                    };
+                    // ===================================================================
+
+                    // NEW: Add a check for the placeholder API key
+                    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !firebaseConfig.apiKey) {
+                        setError("Firebase API Key is missing. Please edit the index.html file and add your Firebase configuration from the Firebase console.");
+                        setIsLoading(false);
+                        return;
+                    }
+
                     const app = initializeApp(firebaseConfig);
                     const firestore = getFirestore(app);
                     const auth = getAuth(app);
@@ -369,7 +523,7 @@ const firebaseConfig = {
                     // 3. Sign in to Firebase to satisfy security rules
                     signInAnonymously(auth).catch(authError => {
                         console.error("Firebase Anonymous Auth Error:", authError);
-                        setError("Could not connect to the database.");
+                        setError("Could not connect to the database. Check your Firebase API key and security rules.");
                     });
 
                 } catch (e) {
@@ -405,7 +559,7 @@ const firebaseConfig = {
 
                 handleProfile().catch(err => {
                     console.error("Error handling profile:", err);
-                    setError("Failed to load your profile.");
+                    setError("Failed to load your profile. Please check your Firestore security rules.");
                 }).finally(() => {
                      setIsLoading(false);
                 });
@@ -418,7 +572,7 @@ const firebaseConfig = {
                     setBooks(booksData);
                 }, (err) => {
                     console.error("Error fetching books:", err);
-                    setError("Failed to fetch your books.");
+                    setError("Failed to fetch your books. Please check your Firestore indexes.");
                 });
 
                 return () => unsubscribeBooks();
@@ -504,8 +658,9 @@ const firebaseConfig = {
                 }
             };
 
+            // UPDATED: Render logic to show the new loading screen
             if (isLoading) {
-                return <div className="flex items-center justify-center h-screen"><Spinner size="h-12 w-12" /></div>;
+                return <LoadingScreen />;
             }
 
             if (error) {
@@ -522,7 +677,7 @@ const firebaseConfig = {
             return userProfile ? (
                 <MainApp user={userProfile} books={books} onLogReading={handleLogReading} onAddNewBook={handleAddNewBook} onDeleteBook={handleDeleteBook} />
             ) : (
-                 <div className="flex items-center justify-center h-screen"><Spinner size="h-12 w-12" /></div>
+                 <div className="flex items-center justify-center h-screen"><Spinner size="h-12 w-12" /></div> // Fallback spinner if profile is still loading
             );
         }
 
