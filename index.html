@@ -494,17 +494,7 @@
                     // 2. Initialize Firebase
                     setLogLevel('debug');
                     
-                    // ===================================================================
-                    // IMPORTANT: PASTE YOUR FIREBASE CONFIG OBJECT HERE
-                    // ===================================================================
-                    // Import the functions you need from the SDKs you need
-                    import { initializeApp } from "firebase/app";
-                    import { getAnalytics } from "firebase/analytics";
-                    // TODO: Add SDKs for Firebase products that you want to use
-                    // https://firebase.google.com/docs/web/setup#available-libraries
-                    
                     // Your web app's Firebase configuration
-                    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
                     const firebaseConfig = {
                       apiKey: "AIzaSyAtqq96GDDTw2gQ8XR484IJhxdmeEaxuLk",
                       authDomain: "kitobchallenge.firebaseapp.com",
@@ -512,20 +502,8 @@
                       storageBucket: "kitobchallenge.firebasestorage.app",
                       messagingSenderId: "541058048837",
                       appId: "1:541058048837:web:359c76e3789e7b8ee8942c",
-                      measurementId: "G-CN7JWZKGXF"
+                      measurementId: "G-CN73WZKGXF"
                     };
-                    
-                    // Initialize Firebase
-                    const app = initializeApp(firebaseConfig);
-                    const analytics = getAnalytics(app);
-                    // ===================================================================
-
-                    // NEW: Add a check for the placeholder API key
-                    if (firebaseConfig.apiKey === "YOUR_API_KEY" || !firebaseConfig.apiKey) {
-                        setError("Firebase API Key is missing. Please edit the index.html file and add your Firebase configuration from the Firebase console.");
-                        setIsLoading(false);
-                        return;
-                    }
 
                     const app = initializeApp(firebaseConfig);
                     const firestore = getFirestore(app);
