@@ -86,7 +86,7 @@
             animation-fill-mode: backwards;
         }
 
-        /* Responsive Design */
+        
         @media (max-width: 600px) {
             .logo {
                 font-size: 2rem;
